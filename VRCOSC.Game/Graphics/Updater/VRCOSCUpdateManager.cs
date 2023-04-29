@@ -80,4 +80,5 @@ public abstract partial class VRCOSCUpdateManager : Component
     public abstract Task PerformUpdateCheck();
     protected abstract Task ApplyUpdatesAsync();
     protected abstract Task PrepareUpdateAsync();
+    public abstract void SetPreRelease(bool preRelease);
 }

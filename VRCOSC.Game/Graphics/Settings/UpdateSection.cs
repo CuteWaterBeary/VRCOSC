@@ -12,5 +12,6 @@ public sealed partial class UpdateSection : SectionContainer
     protected override void GenerateItems()
     {
         AddDropdown("Update Mode", "How should VRCOSC handle updating?", ConfigManager.GetBindable<UpdateMode>(VRCOSCSetting.UpdateMode));
+        AddToggle("Use PreRelease", "Update to the latest experimental version of VRCOSC", ConfigManager.GetBindable<bool>(VRCOSCSetting.UsePreRelease));
     }
 }

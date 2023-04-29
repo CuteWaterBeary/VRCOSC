@@ -56,6 +56,7 @@ public abstract partial class VRCOSCGame : VRCOSCGameBase
     private NotificationContainer notificationContainer = null!;
     private VRCOSCUpdateManager updateManager = null!;
     private RouterManager routerManager = null!;
+    private Bindable<bool> preReleaseBindable = null!;
 
     [BackgroundDependencyLoader]
     private void load()
@@ -84,7 +85,6 @@ public abstract partial class VRCOSCGame : VRCOSCGameBase
         base.LoadComplete();
 
         copyOpenVrFiles();
-        checkUpdates();
         checkVersion();
 
         notificationContainer.Notify(new TimedNotification
@@ -110,6 +110,17 @@ public abstract partial class VRCOSCGame : VRCOSCGameBase
         selectedTab.BindValueChanged(tab =>
         {
             if (tab.OldValue == Tab.Router) routerManager.SaveData();
+        });
+
+        preReleaseBindable = ConfigManager.GetBindable<bool>(VRCOSCSetting.UsePreRelease);
+        updateManager.SetPreRelease(preReleaseBindable.Value);
+
+        checkUpdates();
+
+        preReleaseBindable.BindValueChanged(e =>
+        {
+            updateManager.SetPreRelease(e.NewValue);
+            if (e.NewValue) checkUpdates();
         });
     }
 

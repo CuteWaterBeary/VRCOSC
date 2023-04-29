@@ -13,13 +13,13 @@ public partial class SquirrelUpdateManager : VRCOSCUpdateManager
 {
     private const string repo = "https://github.com/VolcanicArts/VRCOSC";
 
-    private readonly GithubUpdateManager updateManager;
+    private GithubUpdateManager? updateManager;
     private UpdateInfo? updateInfo;
     private bool useDelta;
+    private bool usePreRelease;
 
     public SquirrelUpdateManager()
     {
-        updateManager = new GithubUpdateManager(repo);
         initialise();
     }
 
@@ -29,13 +29,21 @@ public partial class SquirrelUpdateManager : VRCOSCUpdateManager
         useDelta = true;
     }
 
+    public override void SetPreRelease(bool preRelease)
+    {
+        usePreRelease = preRelease;
+    }
+
     protected override Task PrepareUpdateAsync() => UpdateManager.RestartAppWhenExited();
 
     public override async Task PerformUpdateCheck() => await checkForUpdateAsync().ConfigureAwait(false);
 
     private async Task checkForUpdateAsync()
     {
-        Log("Checking for updates");
+        updateManager?.Dispose();
+        updateManager = new GithubUpdateManager(repo, usePreRelease);
+
+        Log($"Checking for updates\nUsing Pre Release: {usePreRelease}");
 
         if (!updateManager.IsInstalledApp)
         {
@@ -72,6 +80,9 @@ public partial class SquirrelUpdateManager : VRCOSCUpdateManager
     protected override async Task ApplyUpdatesAsync()
     {
         Log("Attempting to apply updates");
+
+        if (updateManager is null)
+            throw new InvalidOperationException("Critical error. UpdateManager not initialised");
 
         if (updateInfo is null)
             throw new InvalidOperationException("Cannot apply updates without checking");
@@ -110,6 +121,6 @@ public partial class SquirrelUpdateManager : VRCOSCUpdateManager
     protected override void Dispose(bool isDisposing)
     {
         base.Dispose(isDisposing);
-        updateManager.Dispose();
+        updateManager?.Dispose();
     }
 }
